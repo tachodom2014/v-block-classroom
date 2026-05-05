@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ lesson.title }} - Technical Drawing LMS</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .lesson-3d-wrapper {
+            width: 100%;
+            height: 520px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid #d7dde3;
+            background: #f8fbfd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .lesson-3d-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        .standard-box {
+            background: #cff4fc;
+            border: 1px solid #9eeaf9;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-11">
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="fw-bold mb-0">{{ lesson.title }}</h2>
+                <a href="/" class="btn btn-outline-secondary">Back to Lessons</a>
+            </div>
+
+            <div class="standard-box">
+                <strong>Engineering Standard Alignment</strong>
+                <p class="mb-1">Standards: ISO 5456 / ISO 128 (ISO 5456 for pictorial methods, ISO 128 for line conventions)</p>
+                <p class="mb-1">Focus: Isometric (30°/30°) and Oblique (45°) pictorial construction</p>
+                <p class="mb-0"><strong>Learning Outcome:</strong> นิสิตสามารถสร้างภาพ Isometric จากภาพฉายได้ตามมาตรฐาน ISO 5456-3</p>
+            </div>
+
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4">
+
+                    {% if show_pre_test %}
+                    <div id="preTestSection">
+                        <div class="alert alert-info">
+                            <h4 class="alert-heading">Pre-Test Required</h4>
+                            <p>You must complete this 15-question pre-test before viewing the lesson material.</p>
+                        </div>
+
+                        <form method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="submit_pre_test">
+
+                            {% for question in pre_questions %}
+                            <div class="mb-4 pb-3 border-bottom">
+                                <p class="fw-bold">{{ forloop.counter }}. {{ question.text }}</p>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="{{ question.choice1 }}" required>
+                                    <label class="form-check-label">{{ question.choice1 }}</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="{{ question.choice2 }}">
+                                    <label class="form-check-label">{{ question.choice2 }}</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="{{ question.choice3 }}">
+                                    <label class="form-check-label">{{ question.choice3 }}</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="{{ question.choice4 }}">
+                                    <label class="form-check-label">{{ question.choice4 }}</label>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="alert alert-warning">No questions available. Admin needs to add PRE_TEST questions.</div>
+                            <button type="submit" class="btn btn-primary">Bypass Pre-test</button>
+                            {% endfor %}
+
+                            {% if pre_questions %}
+                            <button type="submit" class="btn btn-primary d-block w-100 py-3 fw-bold mt-4">
+                                Submit Pre-Test & Continue
+                            </button>
+                            {% endif %}
+                        </form>
+                    </div>
+                    {% endif %}
+
+                    {% if show_content %}
+                    <div id="contentSection">
+
+                        {% if progress.pre_test_score is not None %}
+                        <div class="alert alert-success mb-4">
+                            You scored <strong>{{ progress.pre_test_score }}</strong> on the Pre-test. Please proceed with the lesson.
+                        </div>
+                        {% endif %}
+
+                        <div class="row g-4 mb-5">
+                            <div class="col-lg-3">
+                                <div class="border rounded-4 p-4 bg-light h-100">
+                                    <h4 class="fw-bold">Interactive 3D Lesson</h4>
+                                    <p class="text-muted">
+                                        Rotate with drag, zoom with scroll, and reset to the standard view.
+                                    </p>
+
+                                    <p class="small text-uppercase text-muted mb-2">Lesson Selector</p>
+                                    <div class="btn-group w-100 mb-4" role="group">
+                                        <button class="btn btn-primary">Lesson 1</button>
+                                        <button class="btn btn-outline-primary">Lesson 2</button>
+                                        <button class="btn btn-outline-primary">Lesson 3</button>
+                                        <button class="btn btn-outline-primary">Lesson 4</button>
+                                    </div>
+
+                                    <h6 class="fw-bold">Isometric Basics</h6>
+                                    <p class="small text-muted">Cube construction using 30° axes.</p>
+
+                                    <div class="small">
+                                        <p>🔴🟢 Axes (X, Y, Z)</p>
+                                        <p>➖ Construction lines (thin)</p>
+                                        <p>🔵 Object edges (bold)</p>
+                                        <p>🟠 30° isometric guide</p>
+                                        <p>🟢 45° oblique guide</p>
+                                    </div>
+
+                                    <button class="btn btn-primary w-100 mt-3">Reset View</button>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-9">
+                                <div class="border rounded-4 p-3 bg-white">
+                                    <p class="small text-muted mb-2">Drag to rotate · Scroll to zoom</p>
+
+                                    <div class="lesson-3d-wrapper">
+                                        <!-- ตรงนี้คือตัวเชื่อมไปหา Next.js ครับ! -->
+                                        <iframe src="http://localhost:3000/lessons/v-block-game"></iframe>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="lesson-text mb-5 fs-5">
+                            {{ lesson.content|safe }}
+                        </div>
+
+                        <div class="lesson-video mb-5">
+                            {% if lesson.video_url %}
+                            <iframe src="{{ lesson.video_url }}"
+                                    title="{{ lesson.title }}"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen
+                                    class="w-100 rounded-3 border"
+                                    style="height: 500px;"></iframe>
+                            {% else %}
+                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded-3" style="height: 400px;">
+                                <h3>Video Content Not Available</h3>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="text-center mt-5 p-4 bg-light rounded border">
+                            <h4>Ready to test your knowledge?</h4>
+                            <p class="text-muted">
+                                Once you feel comfortable with the Third-Angle Projection methods discussed above, proceed to the assessment.
+                            </p>
+                            <a href="?take_post_test=true" class="btn btn-success btn-lg px-5 my-2">
+                                Take Post-Test
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if show_post_test %}
+                    <div id="postTestSection">
+                        <div class="alert alert-primary">
+                            <h4 class="alert-heading">Final Assessment</h4>
+                            <p>Complete this test to mark the lesson as fully completed and unlock the next module.</p>
+                        </div>
+
+                        <form method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="submit_post_test">
+
+                            {% for question in post_questions %}
+                            <div class="mb-4 pb-3 border-bottom">
+                                <p class="fw-bold">{{ forloop.counter }}. {{ question.text }}</p>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="{{ question.choice1 }}" required>
+                                    <label class="form-check-label">{{ question.choice1 }}</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="{{ question.choice2 }}">
+                                    <label class="form-check-label">{{ question.choice2 }}</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="{{ question.choice3 }}">
+                                    <label class="form-check-label">{{ question.choice3 }}</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="question_{{ question.id }}" value="{{ question.choice4 }}">
+                                    <label class="form-check-label">{{ question.choice4 }}</label>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="alert alert-warning">No questions available. Admin needs to add POST_TEST questions.</div>
+                            <button type="submit" class="btn btn-success">Bypass Post-test & Complete</button>
+                            {% endfor %}
+
+                            {% if post_questions %}
+                            <button type="submit" class="btn btn-success d-block w-100 py-3 fw-bold mt-4">
+                                Submit Post-Test & Unlock Next Lesson
+                            </button>
+                            {% endif %}
+                        </form>
+                    </div>
+                    {% endif %}
+
+                    {% if progress.is_completed and not show_post_test %}
+                    <div id="completedSection" class="text-center py-5">
+                        <div class="display-1 text-success mb-3">✓</div>
+                        <h2>Lesson Completed!</h2>
+                        <p class="lead">You scored <strong>{{ progress.post_test_score }}</strong> on the final assessment.</p>
+                        <a href="{% url 'lesson_list' %}" class="btn btn-outline-primary mt-3">Back to Modules</a>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
